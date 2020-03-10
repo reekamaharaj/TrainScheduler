@@ -50,15 +50,37 @@ $("#newTrain").on("click", function(event) {
 database.ref().on("child_added", function(snapshot){
     trainName = snapshot.val().name;
     trainDestination = snapshot.val().destination;
-    trainFrequency = parseInt(snapshot.val().frequency);
-    firstTrainTime = Date.parse(snapshot.val().firstTime);
-
+    trainFrequency = snapshot.val().frequency;
+    firstTrainTime = snapshot.val().firstTime;
+    console.log(snapshot.val().frequency);
+    //0
+    console.log(snapshot.val().firstTime);
+    //0:00
     firstTime = moment(firstTrainTime, "HH:mm").subtract(1, "years");
-    time = moment().diff(moment(firstTime), "minutes");
+    console.log(firstTime);
+    //object
+
+    time = currentTime.diff(moment(firstTime), "minutes");
+    console.log(time);
+    //Nan
+
     timeDiff = time % trainFrequency;
+    console.log(timeDiff);
+    //Nan
+
     minsAway = trainFrequency - timeDiff;
+    console.log(minsAway);
+    //NaN
+
     nextTrain = moment().add(minsAway, "minutes");
+    console.log(nextTrain);
+    //object
+
     nextTrainArrival = moment(nextTrain).format("hh:mm");
+    console.log(nextTrainArrival);
+    //00:00
+
+
     $("thead").append(`
     <tr>
         <td>${trainName}</td>
