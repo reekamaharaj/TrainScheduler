@@ -11,11 +11,13 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
+
+
+
 let trainName;
 let trainDestination;
 let firstTrainTime;
 let trainFrequency;
-let newTrain;
 let firstTime;
 let time;
 let minsAway;
@@ -23,6 +25,18 @@ let nextTrain;
 let currentTime = moment();
 let nextTrainArrival;
 let timeDiff;
+
+$(document).ready(function(){
+    $("input.timepicker").timepicker({
+        timeFormat: 'HH:mm',
+        minTime: '10',
+        defaultTime: 'now',
+        startTime: '10:00',
+        dynamic: false,
+        dropdown: false,
+        scrollbar: false
+    });
+});
 
 // Capture Button Click
 $("#newTrain").on("click", function(event) {
@@ -33,13 +47,12 @@ $("#newTrain").on("click", function(event) {
     firstTrainTime = $("#firstTrainTime-input").val().trim();
     trainFrequency = $("#trainFrequency-input").val().trim();
 
-    newTrain = {
+    database.ref().push({
         name: trainName,
         destination: trainDestination,
         firstTime: firstTrainTime,
         frequency: trainFrequency,
-    };
-    database.ref().push(newTrain);
+    });
 
     $("#trainName-input").val("");
     $("#trainDestination-input").val("");
@@ -52,34 +65,18 @@ database.ref().on("child_added", function(snapshot){
     trainDestination = snapshot.val().destination;
     trainFrequency = snapshot.val().frequency;
     firstTrainTime = snapshot.val().firstTime;
-    console.log(snapshot.val().frequency);
-    //0
-    console.log(snapshot.val().firstTime);
-    //0:00
-    firstTime = moment(firstTrainTime, "HH:mm").subtract(1, "years");
-    console.log(firstTime);
-    //object
-
+    
+    firstTime = moment(firstTrainTime, "HH:mm");
+    
     time = currentTime.diff(moment(firstTime), "minutes");
-    console.log(time);
-    //Nan
-
+    
     timeDiff = time % trainFrequency;
-    console.log(timeDiff);
-    //Nan
 
     minsAway = trainFrequency - timeDiff;
-    console.log(minsAway);
-    //NaN
 
     nextTrain = moment().add(minsAway, "minutes");
-    console.log(nextTrain);
-    //object
 
     nextTrainArrival = moment(nextTrain).format("hh:mm");
-    console.log(nextTrainArrival);
-    //00:00
-
 
     $("thead").append(`
     <tr>
