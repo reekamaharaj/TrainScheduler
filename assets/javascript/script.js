@@ -60,23 +60,18 @@ $("#newTrain").on("click", function(event) {
     $("#trainFrequency-input").val("");
 });
 
-database.ref().on("child_added", function(snapshot){
-    trainName = snapshot.val().name;
-    trainDestination = snapshot.val().destination;
-    trainFrequency = snapshot.val().frequency;
-    firstTrainTime = snapshot.val().firstTime;
+database.ref().on("child_added", function(childSnapshot){
+    trainName = childSnapshot.val().name;
+    trainDestination = childSnapshot.val().destination;
+    trainFrequency = childSnapshot.val().frequency;
+    firstTrainTime = childSnapshot.val().firstTime;
     
     firstTime = moment(firstTrainTime, "HH:mm");
-    
     time = currentTime.diff(moment(firstTime), "minutes");
-    
     timeDiff = time % trainFrequency;
-
     minsAway = trainFrequency - timeDiff;
-
     nextTrain = moment().add(minsAway, "minutes");
-
-    nextTrainArrival = moment(nextTrain).format("hh:mm");
+    nextTrainArrival = moment(nextTrain).format("HH:mm");
 
     $("thead").append(`
     <tr>
@@ -90,4 +85,3 @@ database.ref().on("child_added", function(snapshot){
 }, function(errorObject) {
     console.log("Errors handled: " + errorObject.code);
 })
-//when adding new things, it is shown right, but doesn't come from the database formatted to be displayed
