@@ -11,9 +11,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
-
-
-
+let newTrain;
 let trainName;
 let trainDestination;
 let firstTrainTime;
@@ -25,6 +23,7 @@ let nextTrain;
 let currentTime = moment();
 let nextTrainArrival;
 let timeDiff;
+let updateData;
 
 $(document).ready(function(){
     $("input.timepicker").timepicker({
@@ -38,6 +37,11 @@ $(document).ready(function(){
     });
 });
 
+database.ref().once("value", function(snapshot){
+    // rebuild table from database
+
+})
+
 // Capture Button Click
 $("#newTrain").on("click", function(event) {
     event.preventDefault();
@@ -47,12 +51,13 @@ $("#newTrain").on("click", function(event) {
     firstTrainTime = $("#firstTrainTime-input").val().trim();
     trainFrequency = $("#trainFrequency-input").val().trim();
 
-    database.ref().push({
+    newTrain = {
         name: trainName,
         destination: trainDestination,
         firstTime: firstTrainTime,
         frequency: trainFrequency,
-    });
+    }
+    database.ref().push(newTrain);
 
     $("#trainName-input").val("");
     $("#trainDestination-input").val("");
@@ -66,7 +71,7 @@ database.ref().on("child_added", function(childSnapshot){
     trainFrequency = childSnapshot.val().frequency;
     firstTrainTime = childSnapshot.val().firstTime;
     
-    firstTime = moment(firstTrainTime, "HH:mm");
+    firstTime = moment(firstTrainTime, "HH:mm").subtract(1, "years");
     time = currentTime.diff(moment(firstTime), "minutes");
     timeDiff = time % trainFrequency;
     minsAway = trainFrequency - timeDiff;
@@ -74,7 +79,7 @@ database.ref().on("child_added", function(childSnapshot){
     nextTrainArrival = moment(nextTrain).format("HH:mm");
 
     $("thead").append(`
-    <tr>
+    <tr id = "${childSnapshot.key}">
         <td>${trainName}</td>
         <td>${trainDestination}</td>
         <td>${trainFrequency}</td>
@@ -82,6 +87,8 @@ database.ref().on("child_added", function(childSnapshot){
         <td>${minsAway}</td>
     </tr>
     `)
+
+    
 }, function(errorObject) {
     console.log("Errors handled: " + errorObject.code);
 })
